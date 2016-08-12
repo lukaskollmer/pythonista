@@ -9,13 +9,12 @@ __copyright__ = "Copyright (c) 2016 Lukas Kollmer<lukas.kollmer@gmail.com>"
 try:
 	import objc_util
 	_HAS_OBJC_UTIL = True
+	_application = objc_util.UIApplication.sharedApplication()
 except:
 	_HAS_OBJC_UTIL = False
 
-_application = objc_util.UIApplication.sharedApplication()
-
 def guard_objc_util():
-	if not _HAS_OBJC_UTIL: raise NameError("objc_util not available")
+	if not _HAS_OBJC_UTIL: raise ImportError("objc_util not available")
 
 def add_method(method, cls):
 	guard_objc_util()
