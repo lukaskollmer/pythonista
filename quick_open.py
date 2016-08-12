@@ -21,7 +21,7 @@ UIColor = objc_util.ObjCClass('UIColor')
 
 class QuickOpenTableView (ui.View):
 	def __init__(self):
-		self.name = "QuickOpen"
+		self.name = "Quick Open"
 		
 		self.selection_index = 0
 		
