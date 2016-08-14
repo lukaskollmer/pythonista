@@ -19,7 +19,10 @@ UIFont = objc_util.ObjCClass("UIFont")
 OMBarButton = objc_util.ObjCClass('OMBarButton')
 UIButton = objc_util.ObjCClass('UIButton')
 
+
+
 PA2UniversalTextEditorViewController = objc_util.ObjCClass("PA2UniversalTextEditorViewController")
+PA2EmptyTabViewController = objc_util.ObjCClass("PA2EmptyTabViewController")
 
 
 CTFontManagerRegisterFontsForURL = objc_util.c.CTFontManagerRegisterFontsForURL
@@ -94,58 +97,8 @@ def add_image_button_item(image, action, position=_DEFAULT_BAR_BUTTON_POSITION):
 
 
 # --- Editor Keyboard Shortcuts
+""" Moved to the `shortcuts` submodule """
 
-UIKeyCommand = objc_util.ObjCClass('UIKeyCommand')
-PASlidingContainerViewController = objc_util.ObjCClass('PASlidingContainerViewController')
-
-_UIKeyModifierAlphaShift = 1 << 16
-_UIKeyModifierShift      = 1 << 17
-_UIKeyModifierControl    = 1 << 18
-_UIKeyModifierAlternate  = 1 << 19
-_UIKeyMofifierCommand    = 1 << 20
-_UIKeyModifierNumericPad = 1 << 21
-
-
-_modifiers_map = {
-	"cmd":      _UIKeyMofifierCommand,
-	"capslock": _UIKeyModifierAlphaShift,
-	"shift":    _UIKeyModifierShift,
-	"control":  _UIKeyModifierControl,
-	"alt":      _UIKeyModifierAlternate,
-	"num":      _UIKeyModifierNumericPad
-}
-
-def register_shortcut(shortcut, action=None, title=None):
-	"""
-	Note: this shortcut works only when the editor is in focus. (no idea why)
-	For some reason i, b, u dont work (http://www.openradar.me/25463955p\)
-	"""
-	
-	rootVC = _utils._application.keyWindow().rootViewController()
-	
-	if isinstance(shortcut, objc_util.ObjCInstance):
-		if shortcut.isKindOfClass_(UIKeyCommand):
-			rootVC.addKeyCommand_(shortcut)
-			return shortcut
-	keys = shortcut.split("+")
-	_modifiers = keys[:-1]
-	input = keys[-1].upper()
-	
-	modifiers = (0 << 00)
-	for modifier in _modifiers:
-		modifiers |= _modifiers_map[modifier.lower()]
-	
-	
-	selector = _utils.add_method(action, rootVC)
-	keyCommand = UIKeyCommand.keyCommandWithInput_modifierFlags_action_discoverabilityTitle_(input, modifiers, selector, title)
-	
-	rootVC.addKeyCommand_(keyCommand)
-	
-	return keyCommand
-
-def deregister_shortcut(command):
-	rootVC = _utils._application.keyWindow().rootViewController()
-	rootVC.removeKeyCommand_(command)
 
 # --- Tab Management
 def close_tab(tab):
@@ -164,14 +117,43 @@ def close_current_tab():
 	tab = editor._get_editor_tab()
 	close_tab(tab)
 
-def open_tab(path=None):
+def open_tab(path_or_index=None):
 	tabVC = _utils._application.keyWindow().rootViewController().detailViewController()
-	if path is None:
+	# Open a new empty tab
+	if isinstance(path_or_index, type(None)):
 		tabVC.addTab_(None)
-	else:
+	
+	# Open a new tab with a file
+	if isinstance(path_or_index, str):
 		import editor
 		#tabVC.open(File=path, inNewTab=True, withPreferredEditorType=True, forceReload=False)
-		editor.open_file(path, new_tab=True, force_reload=False)
+		editor.open_file(path_or_index, new_tab=True, force_reload=False)
+	
+	# Switch to an existing tab
+	if isinstance(path_or_index, int):
+		# This doesn't really work well, since just the editor will change tab,
+		# but Pythonista won't select a different tab in the tab bar
+		#tabVC.selectTabAtIndex_(path)
+		
+		# from editor.py
+		tabs = []
+		for tab in tabVC.tabViewControllers():
+			if tab.isKindOfClass_(PA2EmptyTabViewController):
+				tabs.append(None)
+			if tab.isKindOfClass_(PA2UniversalTextEditorViewController):
+				if not tab.isViewLoaded():
+					tabs.append(None)
+					continue
+				tab_path = str(tab.filePath())
+				tabs.append(tab_path)
+		
+		path = tabs[path_or_index]
+		if not path is None:
+			import editor
+			editor.open_file(path, new_tab=True, force_reload=False)
+		else:
+			raise ValueError("Can't open empty path")
+		
 	
 
 # --- Quick Open
@@ -192,7 +174,7 @@ if __name__ == "__main__":
 	font_name = "Menlo-Regular"
 	#set_editor_font(font_name, 15)
 	
-	
+	"""
 	# Test bar buttons
 	def button_action(_self, _sel):
 		print("button tapped!!!")
@@ -204,4 +186,6 @@ if __name__ == "__main__":
 		print("Command G pressed")
 	
 	register_shortcut("cmd+g", commandGHandler, "")
+	"""
 	
+	open_tab(2)

@@ -36,6 +36,7 @@ from pythonista import editor_util
 from pythonista import files
 from pythonista import interpreter
 from pythonista import quick_open
+from pythonista import shortcuts
 from pythonista import theme
 from pythonista import version
 from pythonista import wrenchmenu

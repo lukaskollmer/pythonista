@@ -7,6 +7,7 @@ __copyright__ = "Copyright (c) 2016 Lukas Kollmer<lukas.kollmer@gmail.com>"
 
 from pythonista import _utils
 from pythonista import files
+from pythonista import shortcuts
 from pythonista import editor_util
 from pythonista import theme
 
@@ -93,8 +94,8 @@ class QuickOpenTableView (ui.View):
 				self.selection_index += 1
 				self.reload_selection()
 		
-		self.arrow_up_hook = editor_util.register_shortcut("UIKeyInputUpArrow" , up_arrow)
-		self.arrow_down_hook = editor_util.register_shortcut("UIKeyInputDownArrow", down_arrow)
+		self.arrow_up_hook = shortcuts.register("UIKeyInputUpArrow" , up_arrow)
+		self.arrow_down_hook = shortcuts.register("UIKeyInputDownArrow", down_arrow)
 		
 		
 		# use cmd+w to close this view
@@ -161,8 +162,8 @@ class QuickOpenTableView (ui.View):
 		self.close()
 	
 	def will_close(self):
-		editor_util.deregister_shortcut(self.arrow_up_hook)
-		editor_util.deregister_shortcut(self.arrow_down_hook)
+		shortcuts.deregister(self.arrow_up_hook)
+		shortcuts.deregister(self.arrow_down_hook)
 		
 		"""editor_util.deregister_shortcut(self.close_hook)
 		editor_util.register_shortcut(cmd_w)"""
