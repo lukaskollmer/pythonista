@@ -98,8 +98,14 @@ def _add_custom_command(command):
 
 def keyCommands(_self, _sel):
 	return _get_custom_commands().ptr
-	#return NSArray.array().ptr
 
+
+# Even though the script will be imported multiple times, we should swizzle only once
+if not "originalkeyCommands" in dir(_utils._application):
+	app = _utils._application
+	cls = objc_util.ObjCInstance(objc_util.c.object_getClass(app.ptr))
+	
+	swizzle.swizzle(cls, 'keyCommands', keyCommands)
 
 
 if __name__ == "__main__":
@@ -113,13 +119,3 @@ if __name__ == "__main__":
 	print(_get_custom_commands())
 	deregister(c)
 
-if not "originalkeyCommands" in dir(_utils._application):
-	app = _utils._application
-	cls = objc_util.ObjCInstance(objc_util.c.object_getClass(app.ptr))
-	print(cls)
-	
-	swizzle.swizzle(cls, 'keyCommands', keyCommands)
-
-
-#for cmd in _utils._application.originalkeyCommands():
-#	print(cmd.modifierFlags())
