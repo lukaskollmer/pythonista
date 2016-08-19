@@ -15,5 +15,7 @@ def background_color():
 	return get().get("background")
 
 if __name__ == "__main__":
-	print(get())
-	print(background_color())
+	import json
+	print(json.dumps(get(), indent=4))
+	#print(get())
+	#print(background_color())
