@@ -23,6 +23,7 @@ objc_setAssociatedObject.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_
 objc_setAssociatedObject.restype = None
 
 NSArray = objc_util.ObjCClass("NSArray")
+NSMutableArray = objc_util.ObjCClass("NSMutableArray")
 UIKeyCommand = objc_util.ObjCClass('UIKeyCommand')
 
 associated_obj_key = objc_util.ns("lk_custom_key_commands")
@@ -97,25 +98,23 @@ def _add_custom_command(command):
 	save_custom_commands(existing_custom_commands)
 
 def keyCommands(_self, _sel):
-	return _get_custom_commands().ptr
+	commands = _get_custom_commands()
+	commands.addObjectsFromArray_(_utils._application.originalkeyCommands())
+	return commands.ptr
 
 
 # Even though the script will be imported multiple times, we should swizzle only once
 if not "originalkeyCommands" in dir(_utils._application):
 	app = _utils._application
 	cls = objc_util.ObjCInstance(objc_util.c.object_getClass(app.ptr))
-	
 	swizzle.swizzle(cls, 'keyCommands', keyCommands)
 
 
 if __name__ == "__main__":
-	import console
-	
-	console.clear()
 	def handler(_self, _cmd):
 		print("ACTION")
 	
 	c = register("cmd+option+U", handler, "ACTION")
 	print(_get_custom_commands())
-	deregister(c)
+	#deregister(c)
 
